@@ -1,0 +1,13 @@
+ctransformers==0.2.5
+sentence-transformers==2.2.2
+pinecone-client
+langchain==0.0.225
+flask
+langchain-community
+pypdf
+python-dotenv
+replicate
+gunicorn
+PyPDF2
+langchain_community
+tempfile
