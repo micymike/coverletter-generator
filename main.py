@@ -1,5 +1,7 @@
 import os
 import tempfile
+import asyncio
+import aiofiles
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from fpdf import FPDF
 import gradio as gr
@@ -8,21 +10,23 @@ import gradio as gr
 tokenizer = AutoTokenizer.from_pretrained("gpt2")
 model = AutoModelForCausalLM.from_pretrained("gpt2")
 
-def generate_cover_letter(job_title, job_description, hiring_manager, company_name, company_address, required_skills, company_trait, resume_text):
+async def generate_cover_letter(job_title, job_description, hiring_manager, company_name, company_address, required_skills, company_trait, resume_text):
     resume_data = {
-        "name": "[input your name]",
-        "address": "[input your address]",
-        "city": "[input your city]",
-        "email": "[your email]",
+        "name": "[Your Full Name]",
+        "address": "[Your Address]",
+        "city": "[Your City]",
+        "email": "[Your Email]",
         "phone": "+1234567890",
-        "skills": "[Change this with your actual relevant skills] Python, Flask, SQL",
-        "experience": "[input your experience]",
-        "achievements": "I managed to [input your projects]",
-        "interests": "contributing to open-source projects"
+        "skills": "[Your Skills, e.g., Python, Flask, SQL]",
+        "experience": "[Your Relevant Experience]",
+        "achievements": "[Your Key Achievements]",
+        "interests": "[Your Professional Interests, e.g., contributing to open-source projects]"
     }
     
     prompt = f"""
-    Dear {hiring_manager},
+    {company_address}  
+    
+    {hiring_manager},
     
     I am writing to express my interest in the {job_title} position at {company_name}. With a strong background in {resume_data["skills"]}, particularly my proficiency in {resume_data["skills"]}, I am enthusiastic about the opportunity to apply my expertise to the innovative work being done at your company.
     
@@ -33,6 +37,8 @@ def generate_cover_letter(job_title, job_description, hiring_manager, company_na
     I am particularly drawn to {company_name} because of its commitment to {company_trait}. This commitment resonates with my own professional ethos and my passion for {resume_data["interests"]}.
     
     I am excited about the opportunity to contribute to {company_name} and help achieve your goals.
+    
+    Please find my resume attached for your review. I look forward to discussing how my skills and experiences can benefit {company_name}.
     
     Sincerely,
     {resume_data["name"]}
@@ -45,7 +51,7 @@ def generate_cover_letter(job_title, job_description, hiring_manager, company_na
     
     return cover_letter
 
-def save_pdf_cover_letter(cover_letter_text):
+async def save_pdf_cover_letter(cover_letter_text):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
@@ -59,10 +65,10 @@ def save_pdf_cover_letter(cover_letter_text):
     
     return temp_file_path
 
-def process_resume_and_generate_cover_letter(resume, job_title, job_description, hiring_manager, company_name, company_address, required_skills, company_trait):
+async def process_resume_and_generate_cover_letter(resume, job_title, job_description, hiring_manager, company_name, company_address, required_skills, company_trait):
     resume_text = resume.name  # Directly get the text content
-    cover_letter_text = generate_cover_letter(job_title, job_description, hiring_manager, company_name, company_address, required_skills, company_trait, resume_text)
-    pdf_path = save_pdf_cover_letter(cover_letter_text)
+    cover_letter_text = await generate_cover_letter(job_title, job_description, hiring_manager, company_name, company_address, required_skills, company_trait, resume_text)
+    pdf_path = await save_pdf_cover_letter(cover_letter_text)
     
     return pdf_path
 
@@ -71,7 +77,7 @@ job_title_input = gr.Textbox(label="Job Title")
 job_description_input = gr.Textbox(label="Job Description")
 hiring_manager_input = gr.Textbox(label="Hiring Manager")
 company_name_input = gr.Textbox(label="Company Name")
-company_address_input = gr.Textbox(label="Company Address")
+company_address_input = gr.Textbox(label="Company Address- Remember to include the relevant address")
 required_skills_input = gr.Textbox(label="Required Skills")
 company_trait_input = gr.Textbox(label="Company Trait")
 
